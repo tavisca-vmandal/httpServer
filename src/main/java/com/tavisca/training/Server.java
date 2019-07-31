@@ -1,9 +1,9 @@
 package com.tavisca.training;
 
-
 import java.net.*;
 import java.io.*;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Server
 {
@@ -20,8 +20,8 @@ public class Server
 
             System.out.println("Waiting for a client ...");
 
-            int t=5;
-            while(t-->0)
+
+            while(true)
             {
                 Socket socket=server.accept();
 
@@ -67,6 +67,9 @@ class MultipleClient implements Runnable
             byte[] buffer=new byte[in.available()];
             in.read(buffer);
             String content=new String(buffer);
+            Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
+            Matcher matcher=pattern.matcher(content);
+
             System.out.println(content);
 
             System.out.println("Closing connection");
@@ -78,13 +81,21 @@ class MultipleClient implements Runnable
             out.print(" Content-length: 256");
             out.print("Connection: close\r\n"); // Will close stream
             out.print("\r\n"); // End of headers
-            FileReader fileReader=new FileReader("Welcome.html");
-            BufferedReader bufferedReader=new BufferedReader(fileReader);
 
-            String thisLine="";
 
-            while((thisLine=bufferedReader.readLine())!=null)
-                out.print(thisLine);
+            if(matcher.find())
+            {
+                String fileName=matcher.group(2);
+
+                FileReader fileReader=new FileReader(fileName);
+                BufferedReader bufferedReader=new BufferedReader(fileReader);
+
+                String thisLine="";
+
+                while((thisLine=bufferedReader.readLine())!=null)
+                    out.print(thisLine);
+            }
+
 
             out.close();
             socket.close();
