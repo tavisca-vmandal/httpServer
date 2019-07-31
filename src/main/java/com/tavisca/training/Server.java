@@ -36,9 +36,11 @@ public class Server
         catch(IOException i)
         {
             System.out.println(i);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
     }
 
     public static void main(String args[])
@@ -60,6 +62,8 @@ class MultipleClient implements Runnable
     }
     @Override
     public void run() {
+        String fileName="";
+
         try {
 
             System.out.println(" New Client accepted");
@@ -67,14 +71,11 @@ class MultipleClient implements Runnable
             byte[] buffer=new byte[in.available()];
             in.read(buffer);
             String content=new String(buffer);
-            Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
-            Matcher matcher=pattern.matcher(content);
 
             System.out.println(content);
 
-            System.out.println("Closing connection");
-
-            PrintWriter out=new PrintWriter(socket.getOutputStream(),true);
+            PrintWriter out=null;
+            out=new PrintWriter(socket.getOutputStream(),true);
             out.print("HTTP/1.1 200 \r\n"); // Version & status code
             out.print("Server: My Java HTTP Server : 1.0");
             out.print("Content-Type: html\r\n"); // The type of data
@@ -83,26 +84,60 @@ class MultipleClient implements Runnable
             out.print("\r\n"); // End of headers
 
 
-            if(matcher.find())
-            {
-                String fileName=matcher.group(2);
+            fileName=URLParser(content);
 
-                FileReader fileReader=new FileReader(fileName);
+            if(fileName.trim().isEmpty())
+            {
+                fileName="index.html";
+            }
+
+            FileReader fileReader= null;
+
+            try {
+                fileReader = new FileReader(fileName);
                 BufferedReader bufferedReader=new BufferedReader(fileReader);
 
                 String thisLine="";
 
-                while((thisLine=bufferedReader.readLine())!=null)
+                while((thisLine=bufferedReader.readLine())!=null){
                     out.print(thisLine);
+                }
+            } catch (FileNotFoundException e) {
+                fileReader = new FileReader("FileNotFound.html");
+                BufferedReader bufferedReader=new BufferedReader(fileReader);
+
+                String thisLine="";
+
+                while((thisLine=bufferedReader.readLine())!=null){
+                    out.print(thisLine);
+                }
             }
-
-
+            System.out.println("Closing connection");
             out.close();
-            socket.close();
-            in.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+        finally {
+            try {
+                socket.close();
+                in.close();
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public String URLParser(String content)
+    {
+        String fileName="";
+        Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
+        Matcher matcher=pattern.matcher(content);
+        if(matcher.find()) {
+            fileName = matcher.group(2);
+        }
+        System.out.println(fileName);
+        return fileName;
     }
 }
