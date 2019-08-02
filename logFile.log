@@ -1,0 +1,44 @@
+Aug 02, 2019 12:34:26 PM com.tavisca.training.MyLogger log
+INFO: Server started
+Aug 02, 2019 12:34:45 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 12:34:45 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 12:34:45 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 12:34:45 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 12:36:50 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 1:32:08 PM com.tavisca.training.MyLogger log
+INFO: Server started
+Aug 02, 2019 1:33:02 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 1:33:02 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 1:33:02 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 1:33:02 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Closing connection
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Client accepted
+Aug 02, 2019 1:33:05 PM com.tavisca.training.MyLogger log
+INFO: Closing connection

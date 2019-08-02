@@ -8,7 +8,7 @@ class MultipleClientHandler implements Runnable
 
     private Socket socket;
     private   BufferedInputStream bufferedInputStream;
-
+    MyLogger myLogger=new MyLogger();
     MultipleClientHandler(Socket socket)
     {
         this.socket=socket;
@@ -20,6 +20,7 @@ class MultipleClientHandler implements Runnable
         try {
 
             System.out.println("Client accepted");
+            myLogger.log("Client accepted");
             String socketInputStream = printSocketInputStream();
             Response response=new Response(socket,socketInputStream);
             response.sendResponse();

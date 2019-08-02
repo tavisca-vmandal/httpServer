@@ -10,7 +10,7 @@ public class Response{
     private BufferedOutputStream socketOutputStream;
     private int contentSize;
     private String socketInputStream;
-
+    MyLogger myLogger=new MyLogger();
 
     public Response(Socket socket, String socketInputStream) throws IOException {
 
@@ -20,8 +20,9 @@ public class Response{
 
     }
     public void sendResponse() throws IOException {
-        String fileName=parseURL(socketInputStream);
 
+        UrlParser urlParser=new UrlParser();
+        String fileName=urlParser.parse(socketInputStream);
         try {
 
             fileName=indexPageFileAssignment(fileName);
@@ -34,6 +35,7 @@ public class Response{
         }
         finally {
             System.out.println("Closing connection");
+            myLogger.log("Closing connection");
             socketOutputStream.close();
         }
     }
@@ -78,16 +80,7 @@ public class Response{
         return fileName;
     }
 
-    private String parseURL(String content)
-    {
-        String fileName="";
-        Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
-        Matcher matcher=pattern.matcher(content);
-        if(matcher.find()) {
-            fileName = matcher.group(2);
-        }
-        return fileName;
-    }
+
     private void httpHeader(int statusCode,String contentType,int contentLength)
     {
         String versionAndStatus="HTTP/1.1 "+statusCode +"\r\n";
