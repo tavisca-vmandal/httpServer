@@ -2,92 +2,77 @@ package com.tavisca.training;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class Response{
 
     private BufferedOutputStream socketOutputStream;
-    private int contentSize;
-    private String socketInputStream;
+    private String requestedFile;
     MyLogger myLogger=new MyLogger();
 
-    public Response(Socket socket, String socketInputStream) throws IOException {
+    public Response(Socket socket, String requestedFile) throws IOException {
 
         socketOutputStream =new BufferedOutputStream(socket.getOutputStream());
-        this.socketInputStream=socketInputStream;
-
+        this.requestedFile =requestedFile;
 
     }
-    public void sendResponse() throws IOException {
+    public void sendResponse()  {
 
-        UrlParser urlParser=new UrlParser();
-        String fileName=urlParser.parse(socketInputStream);
         try {
+            if (requestedFile.trim().isEmpty())
+                sendDefaultResponse();
+            else
+                sendRequestedResponse();
 
-            fileName=indexPageFileAssignment(fileName);
-
-            respondSuccessPage(fileName);
-
-        } catch (FileNotFoundException e) {
-            fileName="FileNotFound.html";
-            respondErrorPage(fileName);
+        } catch (IOException e) {
+                respondErrorPage();
         }
-        finally {
-            System.out.println("Closing connection");
-            myLogger.log("Closing connection");
+
+    }
+
+    private void sendDefaultResponse() throws IOException {
+
+        requestedFile="index.html";
+        String headerStatusCode="202 Ok";
+        sendRequestedFile(requestedFile, headerStatusCode);
+
+    }
+
+    private void respondErrorPage() {
+
+        requestedFile="FileNotFound.html";
+        String headerStatusCode="404";
+        try {
+            sendRequestedFile(requestedFile, headerStatusCode);
+        } catch (IOException e) {
+            myLogger.log("Error page Not Found");
+        }
+    }
+
+    private void sendRequestedResponse() throws IOException {
+
+        String headerStatusCode="202 Ok";
+        sendRequestedFile(requestedFile,headerStatusCode);
+    }
+
+    private void sendRequestedFile( String requestedFile,String statusCode) throws IOException {
+
+            FileInputStream fileInputStream = new FileInputStream(requestedFile);
+            int contentSize=fileInputStream.available();
+            byte[] buffer=new byte[contentSize];
+            fileInputStream.read(buffer);
+            writeHttpHeader(statusCode);
+            socketOutputStream.write(buffer);
             socketOutputStream.close();
-        }
-    }
-    private void respondErrorPage(String fileName) throws IOException {
-
-
-        httpHeader(404,"html",contentSize);
-        FileInputStream fileInputStream=new FileInputStream(fileName);
-        contentSize=fileInputStream.available();
-        byte[] buffer=new byte[contentSize];
-        fileInputStream.read(buffer);
-        socketOutputStream.write(buffer);
-
     }
 
-    private void respondSuccessPage(String fileName) throws IOException {
-
-
-        FileInputStream fileInputStream=new FileInputStream(fileName);
-        contentSize=fileInputStream.available();
-        byte[] buffer=new byte[contentSize];
-        String[] extractFileExtension=fileName.split("\\.");
-        String extension=extractFileExtension[1];
-        String contentType="html";
-        if(extension.equals("png"))
-            contentType="image/png";
-
-        fileInputStream.read(buffer);
-
-        httpHeader(202,contentType,contentSize);
-
-        socketOutputStream.write(buffer);
-
-    }
-
-    private String indexPageFileAssignment(String fileName) {
-
-        if(fileName.trim().isEmpty())
-        {
-            fileName="index.html";
-        }
-        return fileName;
-    }
-
-
-    private void httpHeader(int statusCode,String contentType,int contentLength)
+    private void writeHttpHeader(String statusCode)
     {
         String versionAndStatus="HTTP/1.1 "+statusCode +"\r\n";
         String serverHeader="Server: My Java HTTP Server : 1.0\n";
-        String fileContentType="Content-Type: "+contentType+"\r\n";
-        String fileContentLength=" Content-length: "+contentLength;
-        String closeConnection="Connection: close\r\n\n";
+        String fileContentType="Content-Type: "+getContentType(requestedFile)+"\r\n";
+        String fileContentLength="Content-length: "+getFileSize(requestedFile);
+        String closeConnection="Connection: close\r\n\r\n";
 
         try {
             socketOutputStream.write(versionAndStatus.getBytes()); // Version & status code
@@ -99,7 +84,25 @@ public class Response{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
+    private String getContentType(String requestedFile) {
+        try
+        {
+            String[] extractFileExtension = requestedFile.split("\\.");
+            String contentType = extractFileExtension[1];
+            return contentType;
+
+        }catch (ArrayIndexOutOfBoundsException e)
+        {
+            return "html";
+        }
+    }
+
+    public String getFileSize(String requestedFile)
+    {
+        File file =new File(requestedFile);
+        long fileLength=file.length();
+        return String.valueOf(fileLength);
+    }
 }

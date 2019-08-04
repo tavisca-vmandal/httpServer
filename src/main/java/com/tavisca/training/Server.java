@@ -3,7 +3,6 @@ package com.tavisca.training;
 import java.net.*;
 import java.io.*;
 
-
 public class Server
 {
     private static ServerSocket serverSocket = null;
@@ -26,7 +25,7 @@ public class Server
 
         while(true)
         {
-            System.out.println("Waiting for a client ...");
+            //System.out.println("Waiting for a client ...");
             myLogger.log("Waiting for a client ...");
             Socket socket=serverSocket.accept();
             MultipleClientHandler multipleClientHandler=new MultipleClientHandler(socket);
@@ -39,7 +38,6 @@ public class Server
     public static void main(String args[])
     {
         Server server = new Server(5000);
-        //System.out.println("Server started");
 
         try {
             server.handleClient(serverSocket);

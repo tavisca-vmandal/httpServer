@@ -7,12 +7,12 @@ public class UrlParser {
 
     public String parse(String content)
     {
-        String fileName="";
+        String requestedFile="";
         Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
         Matcher matcher=pattern.matcher(content);
         if(matcher.find()) {
-            fileName = matcher.group(2);
+            requestedFile = matcher.group(2);
         }
-        return fileName;
+        return requestedFile;
     }
 }
