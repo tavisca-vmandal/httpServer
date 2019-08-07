@@ -3,65 +3,41 @@ package com.tavisca.training;
 import java.io.*;
 import java.net.Socket;
 
-class MultipleClientHandler implements Runnable
+class RequestHandler implements Runnable
 {
-
     private Socket socket;
-    private   BufferedInputStream bufferedInputStream;
-    MyLogger myLogger=new MyLogger();
 
-    MultipleClientHandler(Socket socket)
-    {
+    RequestHandler(Socket socket) {
         this.socket=socket;
     }
-
     @Override
     public void run() {
-        
-        try{
-
-            myLogger.log("Client accepted");
-
-            processRequest();
+        try(BufferedInputStream socketInputStream=new BufferedInputStream(socket.getInputStream())){
+            String request=getRequest(socketInputStream);
+            System.out.println(request);
+            MyLogger.log("Request: " +request);
+            processRequest(request);
             socket.close();
-            bufferedInputStream.close();
-
         } catch (IOException e) {
-            myLogger.log(e.getMessage());
+            MyLogger.log(e.getMessage());
             e.printStackTrace();
         }
-
     }
-
-    private void processRequest()
-    {
-
+    private String getRequest(BufferedInputStream socketInputStream) throws IOException {
+        byte[] buffer=new byte[socketInputStream.available()];
+        socketInputStream.read(buffer);
+        String request=new String(buffer);
+        return request;
+    }
+    private void processRequest(String request) {
         try {
-            String socketInputStream = printSocketInputStream();
-
-            UrlParser urlParser=new UrlParser();
-            String requestedFile=urlParser.parse(socketInputStream);
-
+            RequestParser requestParser =new RequestParser();
+            String requestedFile= requestParser.parse(request);
             Response response=new Response(socket,requestedFile);
             response.sendResponse();
-
         } catch (IOException e) {
-            myLogger.log(e.getMessage());
+            MyLogger.log(e.getMessage());
             e.printStackTrace();
         }
-
     }
-
-    private String printSocketInputStream() throws IOException {
-
-        bufferedInputStream = new BufferedInputStream(socket.getInputStream());
-
-        byte[] buffer=new byte[bufferedInputStream.available()];
-        bufferedInputStream.read(buffer);
-        String content=new String(buffer);
-        System.out.println(content);
-        myLogger.log("Request: " +content);
-        return content;
-    }
-
 }

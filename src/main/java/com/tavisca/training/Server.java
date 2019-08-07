@@ -1,48 +1,33 @@
 package com.tavisca.training;
-
 import java.net.*;
 import java.io.*;
 
-public class Server
-{
-    private static ServerSocket serverSocket = null;
-    MyLogger myLogger=new MyLogger();
+public class Server {
+    private ServerSocket serverSocket = null;
 
-    public Server(int port)
-    {
-        myLogger.log("Server started");
-        try
-        {
-            serverSocket = new ServerSocket(port);
-        }
-        catch(IOException i)
-        {
-            System.out.println(i);
-
-        }
-    }
-    private void handleClient(ServerSocket serverSocket) throws IOException {
-
-        while(true)
-        {
-            //System.out.println("Waiting for a client ...");
-            myLogger.log("Waiting for a client ...");
-            Socket socket=serverSocket.accept();
-            MultipleClientHandler multipleClientHandler=new MultipleClientHandler(socket);
-            Thread thread=new Thread(multipleClientHandler);
-            thread.start();
-
-        }
-    }
-
-    public static void main(String args[])
-    {
-        Server server = new Server(5000);
-
+    private Server(int port) {
         try {
-            server.handleClient(serverSocket);
-        } catch (IOException e) {
-            e.printStackTrace();
+            serverSocket = new ServerSocket(port);
+            MyLogger.log("Server started");
         }
+        catch(IOException e) {
+           MyLogger.log(e.getMessage());
+        }
+    }
+    private void handleRequest() {
+        while(true){
+            try {
+                Socket  socket = serverSocket.accept();
+                RequestHandler requestHandler=new RequestHandler(socket);
+                Thread thread=new Thread(requestHandler);
+                thread.start();
+            } catch (IOException e) {
+                MyLogger.log(e.getMessage());
+            }
+        }
+    }
+    public static void main(String[] args) {
+        Server server = new Server(5000);
+        server.handleRequest();
     }
 }

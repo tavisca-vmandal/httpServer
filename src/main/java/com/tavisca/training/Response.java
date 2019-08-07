@@ -3,12 +3,11 @@ package com.tavisca.training;
 import java.io.*;
 import java.net.Socket;
 
-
 public class Response{
 
     private BufferedOutputStream socketOutputStream;
     private String requestedFile;
-    MyLogger myLogger=new MyLogger();
+    private Header header=new Header();
 
     public Response(Socket socket, String requestedFile) throws IOException {
 
@@ -17,7 +16,6 @@ public class Response{
 
     }
     public void sendResponse()  {
-
         try {
             if (requestedFile.trim().isEmpty())
                 sendDefaultResponse();
@@ -25,67 +23,43 @@ public class Response{
                 sendRequestedResponse();
 
         } catch (IOException e) {
-                respondErrorPage();
+                sendErrorResponse();
         }
-
     }
-
+    private void setHeader(String status,String requestedFile) {
+        header.setStatus(status);
+        header.setContentLength(getContentLength(requestedFile));
+        header.setContentType(getContentType(requestedFile));
+    }
     private void sendDefaultResponse() throws IOException {
-
         requestedFile="index.html";
-        String headerStatusCode="202 Ok";
-        sendRequestedFile(requestedFile, headerStatusCode);
-
+        setHeader("200",requestedFile);
+        sendRequestedFile(requestedFile);
     }
-
-    private void respondErrorPage() {
-
+    private void sendErrorResponse() {
         requestedFile="FileNotFound.html";
-        String headerStatusCode="404";
+        setHeader("404",requestedFile);
         try {
-            sendRequestedFile(requestedFile, headerStatusCode);
+            sendRequestedFile(requestedFile);
         } catch (IOException e) {
-            myLogger.log("Error page Not Found");
+            MyLogger.log("Error page Not Found");
         }
     }
-
     private void sendRequestedResponse() throws IOException {
 
-        String headerStatusCode="202 Ok";
-        sendRequestedFile(requestedFile,headerStatusCode);
+        setHeader("200",requestedFile);
+        sendRequestedFile(requestedFile);
     }
+    private void sendRequestedFile( String requestedFile) throws IOException {
 
-    private void sendRequestedFile( String requestedFile,String statusCode) throws IOException {
-
-            FileInputStream fileInputStream = new FileInputStream(requestedFile);
-            int contentSize=fileInputStream.available();
-            byte[] buffer=new byte[contentSize];
-            fileInputStream.read(buffer);
-            writeHttpHeader(statusCode);
-            socketOutputStream.write(buffer);
-            socketOutputStream.close();
+        FileInputStream fileInputStream = new FileInputStream(requestedFile);
+        int contentSize=fileInputStream.available();
+        byte[] buffer=new byte[contentSize];
+        fileInputStream.read(buffer);
+        header.sendHeader(socketOutputStream);
+        socketOutputStream.write(buffer);
+        socketOutputStream.close();
     }
-
-    private void writeHttpHeader(String statusCode)
-    {
-        String versionAndStatus="HTTP/1.1 "+statusCode +"\r\n";
-        String serverHeader="Server: My Java HTTP Server : 1.0\n";
-        String fileContentType="Content-Type: "+getContentType(requestedFile)+"\r\n";
-        String fileContentLength="Content-length: "+getFileSize(requestedFile);
-        String closeConnection="Connection: close\r\n\r\n";
-
-        try {
-            socketOutputStream.write(versionAndStatus.getBytes()); // Version & status code
-            socketOutputStream.write(serverHeader.getBytes());
-            socketOutputStream.write(fileContentType.getBytes()); // The type of data
-            socketOutputStream.write(fileContentLength.getBytes());
-            socketOutputStream.write(closeConnection.getBytes()); // Will close stream
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private String getContentType(String requestedFile) {
         try
         {
@@ -98,11 +72,9 @@ public class Response{
             return "html";
         }
     }
-
-    public String getFileSize(String requestedFile)
-    {
+    public long getContentLength(String requestedFile) {
         File file =new File(requestedFile);
         long fileLength=file.length();
-        return String.valueOf(fileLength);
+        return fileLength;
     }
 }

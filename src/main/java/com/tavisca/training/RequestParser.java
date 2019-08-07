@@ -3,7 +3,7 @@ package com.tavisca.training;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UrlParser {
+public class RequestParser {
 
     public String parse(String content)
     {
@@ -11,7 +11,7 @@ public class UrlParser {
         Pattern pattern=Pattern.compile("(.*)(\\s\\/)(.*)(\\sHTTP\\/\\d.\\d)");
         Matcher matcher=pattern.matcher(content);
         if(matcher.find()) {
-            requestedFile = matcher.group(2);
+            requestedFile = matcher.group(3);
         }
         return requestedFile;
     }
