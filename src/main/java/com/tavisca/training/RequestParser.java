@@ -8,7 +8,7 @@ public class UrlParser {
     public String parse(String content)
     {
         String requestedFile="";
-        Pattern pattern=Pattern.compile("(.*)\\s\\/(.*)(HTTP\\/1\\.1)");
+        Pattern pattern=Pattern.compile("(.*)(\\s\\/)(.*)(\\sHTTP\\/\\d.\\d)");
         Matcher matcher=pattern.matcher(content);
         if(matcher.find()) {
             requestedFile = matcher.group(2);
