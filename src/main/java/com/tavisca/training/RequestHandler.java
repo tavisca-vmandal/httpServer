@@ -3,6 +3,8 @@ package com.tavisca.training;
 import java.io.*;
 import java.net.Socket;
 
+import static com.tavisca.training.MyLogger.logger;
+
 class RequestHandler implements Runnable
 {
     private Socket socket;
@@ -15,11 +17,11 @@ class RequestHandler implements Runnable
         try(BufferedInputStream socketInputStream=new BufferedInputStream(socket.getInputStream())){
             String request=getRequest(socketInputStream);
             System.out.println(request);
-            MyLogger.log("Request: " +request);
+            logger.info("Request: " +request);
             processRequest(request);
             socket.close();
         } catch (IOException e) {
-            MyLogger.log(e.getMessage());
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -32,11 +34,11 @@ class RequestHandler implements Runnable
     private void processRequest(String request) {
         try {
             RequestParser requestParser =new RequestParser();
-            String requestedFile= requestParser.parse(request);
-            Response response=new Response(socket,requestedFile);
-            response.sendResponse();
+            requestParser.parseRequest(request);
+            ResponseHandler responseHandler =new ResponseHandler(socket,requestParser.getRequestedFile());
+            responseHandler.sendResponse();
         } catch (IOException e) {
-            MyLogger.log(e.getMessage());
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
     }

@@ -7,16 +7,16 @@ public class MyLogger {
 
     public static Logger logger=LogManager.getLogManager().getLogger(Logger.GLOBAL_LOGGER_NAME);
     public static FileHandler fileHandler;
-    public static void log(String message)
+
+    static
     {
         try {
             fileHandler=new FileHandler("log/logFile.log",true);
             fileHandler.setFormatter(new SimpleFormatter());
             logger.addHandler(fileHandler);
         } catch (IOException e) {
+            logger.warning(e.getMessage());
             e.printStackTrace();
         }
-
-        logger.log(Level.INFO,message);
     }
 }

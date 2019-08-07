@@ -6,20 +6,17 @@ import java.io.IOException;
 public class Header {
     private String status;
     private String contentType;
-    private Long contentLength;
+    private long contentLength;
 
     public void setStatus(String status) {
         this.status=status;
     }
-
     public void setContentLength(long contentLength) {
         this.contentLength=contentLength;
     }
-
     public void setContentType(String contentType) {
         this.contentType=contentType;
     }
-
     public void sendHeader(BufferedOutputStream socketOutputStream) {
         try {
             socketOutputStream.write(("HTTP/1.1 "+status +"\r\n").getBytes()); // Version & status code

@@ -1,17 +1,20 @@
 package com.tavisca.training;
-import java.net.*;
-import java.io.*;
 
+import  static com.tavisca.training.MyLogger.logger;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 public class Server {
     private ServerSocket serverSocket = null;
 
     private Server(int port) {
         try {
             serverSocket = new ServerSocket(port);
-            MyLogger.log("Server started");
+            logger.info("Server started");
         }
         catch(IOException e) {
-           MyLogger.log(e.getMessage());
+            logger.info(e.getMessage());
         }
     }
     private void handleRequest() {
@@ -22,7 +25,7 @@ public class Server {
                 Thread thread=new Thread(requestHandler);
                 thread.start();
             } catch (IOException e) {
-                MyLogger.log(e.getMessage());
+                logger.warning(e.getMessage());
             }
         }
     }

@@ -3,78 +3,57 @@ package com.tavisca.training;
 import java.io.*;
 import java.net.Socket;
 
-public class Response{
+import static com.tavisca.training.MyLogger.logger;
+
+public class ResponseHandler {
 
     private BufferedOutputStream socketOutputStream;
     private String requestedFile;
-    private Header header=new Header();
+    private Header header;
+    private MyFileHandler myFileHandler;
 
-    public Response(Socket socket, String requestedFile) throws IOException {
-
-        socketOutputStream =new BufferedOutputStream(socket.getOutputStream());
-        this.requestedFile =requestedFile;
-
+    public ResponseHandler(Socket socket, String requestedFile) throws IOException {
+        socketOutputStream = new BufferedOutputStream(socket.getOutputStream());
+        this.requestedFile = requestedFile;
+        header = new Header();
+        myFileHandler = new MyFileHandler(header, requestedFile);
     }
-    public void sendResponse()  {
+
+    public void sendResponse() {
         try {
             if (requestedFile.trim().isEmpty())
                 sendDefaultResponse();
             else
                 sendRequestedResponse();
-
         } catch (IOException e) {
-                sendErrorResponse();
+            sendErrorResponse();
         }
     }
-    private void setHeader(String status,String requestedFile) {
+
+    private void setHeader(String status) {
         header.setStatus(status);
-        header.setContentLength(getContentLength(requestedFile));
-        header.setContentType(getContentType(requestedFile));
+        header.setContentLength(myFileHandler.getContentLength());
+        header.setContentType(myFileHandler.getContentType());
     }
+
     private void sendDefaultResponse() throws IOException {
-        requestedFile="index.html";
-        setHeader("200",requestedFile);
-        sendRequestedFile(requestedFile);
+        requestedFile = "index.html";
+        setHeader("200");
+        myFileHandler.respondFile(requestedFile, socketOutputStream);
     }
+
     private void sendErrorResponse() {
-        requestedFile="FileNotFound.html";
-        setHeader("404",requestedFile);
+        requestedFile = "FileNotFound.html";
+        setHeader("404");
         try {
-            sendRequestedFile(requestedFile);
+            myFileHandler.respondFile(requestedFile, socketOutputStream);
         } catch (IOException e) {
-            MyLogger.log("Error page Not Found");
+            logger.warning("Error page:Not Found");
         }
     }
+
     private void sendRequestedResponse() throws IOException {
-
-        setHeader("200",requestedFile);
-        sendRequestedFile(requestedFile);
-    }
-    private void sendRequestedFile( String requestedFile) throws IOException {
-
-        FileInputStream fileInputStream = new FileInputStream(requestedFile);
-        int contentSize=fileInputStream.available();
-        byte[] buffer=new byte[contentSize];
-        fileInputStream.read(buffer);
-        header.sendHeader(socketOutputStream);
-        socketOutputStream.write(buffer);
-        socketOutputStream.close();
-    }
-    private String getContentType(String requestedFile) {
-        try
-        {
-            String[] extractFileExtension = requestedFile.split("\\.");
-            String contentType = extractFileExtension[1];
-            return contentType;
-
-        }catch (ArrayIndexOutOfBoundsException e)
-        {
-            return "html";
-        }
-    }
-    public long getContentLength(String requestedFile) {
-        File file =new File(requestedFile);
-        long fileLength=file.length();
-        return fileLength;
+        setHeader("200");
+        myFileHandler.respondFile(requestedFile, socketOutputStream);
     }
 }

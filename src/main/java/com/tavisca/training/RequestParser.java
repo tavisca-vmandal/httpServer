@@ -5,14 +5,18 @@ import java.util.regex.Pattern;
 
 public class RequestParser {
 
-    public String parse(String content)
+    private String requestedFile="";
+
+    public String getRequestedFile(){
+        return requestedFile;
+    }
+
+    public void parseRequest(String request)
     {
-        String requestedFile="";
         Pattern pattern=Pattern.compile("(.*)(\\s\\/)(.*)(\\sHTTP\\/\\d.\\d)");
-        Matcher matcher=pattern.matcher(content);
+        Matcher matcher=pattern.matcher(request);
         if(matcher.find()) {
             requestedFile = matcher.group(3);
         }
-        return requestedFile;
     }
 }
